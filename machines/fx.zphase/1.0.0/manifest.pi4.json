@@ -1,0 +1,15 @@
+{
+  "id": "fx.zphase",
+  "kind": "effect",
+  "version": "1.0.0",
+  "compatible_from": "1.0.0",
+  "name": "ZPHASE",
+  "short": "ZPH",
+  "author": "trigcondition",
+  "licence": "MIT",
+  "board": "pi4",
+  "api": 3,
+  "source": "https://github.com/trigcondition/sidecar-firmware",
+  "sha256": "b50783a1eb31e691a3c4fb68f787f22d7106ca5064acb8c6a8e45c80befb315a",
+  "description": "Airwindows' ZNotch2 swept by an LFO as a send effect (Plugin API 3): free or tempo-synced sweep, depth, centre, 1 to 4 stacked notches with stereo spread."
+}
