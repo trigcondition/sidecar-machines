@@ -9,6 +9,7 @@
   "fx.nimbus": "trigcondition",
   "fx.phaser": "trigcondition",
   "fx.pingpong": "trigcondition",
+  "fx.zphase": "trigcondition",
   "fxwizard": "amnmkkr",
   "hush1.*": "trigcondition",
   "hush1.sh101": "trigcondition",
