@@ -1,0 +1,15 @@
+{
+  "id": "wavesurfer",
+  "kind": "machine",
+  "version": "1.0.1",
+  "compatible_from": "1.0.0",
+  "name": "WAVESURFER",
+  "short": "WSRF",
+  "author": "amnmkkr",
+  "licence": "MIT",
+  "board": "pi5",
+  "api": 3,
+  "source": "https://github.com/amnmkkr/wavesurfer",
+  "sha256": "e528d13a7d0737b1de4234549716aa0bb588486cc287bd7532c1d263c738c0be",
+  "description": "Bastl Instruments' Kastle 2 Wave Bard (MIT) as a sample player over the project's pool: banks of pool rows, pitch from the trig's note with Wave Bard's quantizer, length forward and reversed, a start point for vocal chops, its tempo-synced delay, chorus and DJ filter. Wave Bard's own code runs unchanged at 44 kHz."
+}
