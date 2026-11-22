@@ -180,13 +180,15 @@
     stopPreview();
     var term = q.value.trim().toLowerCase();
     var b = board.value;
-    var matching = entries.filter(function (e) {
-      if (!all.checked && latest[e.id] && latest[e.id][e.board] !== e.version) return false;
-      if (!term) return true;
-      return [e.id, e.name, e.short, e.author, e.description, e.licence].join(" ").toLowerCase().indexOf(term) >= 0;
+    var current = entries.filter(function (e) {
+      return all.checked || !latest[e.id] || latest[e.id][e.board] === e.version;
     });
-    var shown = groupCards(matching).filter(function (c) {
-      return !b || c.builds.some(function (x) { return x.board === b; });
+    function hit(e) {
+      return [e.id, e.name, e.short, e.author, e.description, e.licence].join(" ").toLowerCase().indexOf(term) >= 0;
+    }
+    // search after grouping: a card that matches keeps every board's download link
+    var shown = groupCards(current).filter(function (c) {
+      return (!term || c.builds.some(hit)) && (!b || c.builds.some(function (x) { return x.board === b; }));
     });
     list.textContent = "";
     shown.forEach(function (c, n) {
@@ -206,7 +208,10 @@
       c.builds.forEach(function (x) {
         var row = el("li", "", "build");
         var name = BOARD_NAMES[x.board] || x.board;
-        row.appendChild(link(x.file, "Download for " + name + " (" + Math.ceil(x.size / 1024) + " KB)"));
+        var kb = Number.isFinite(x.size) && x.size > 0 ? " (" + Math.ceil(x.size / 1024) + " KB)" : "";
+        var dl = link(x.file, "Download for " + name + kb);
+        dl.setAttribute("aria-label", "Download " + (e.name || e.id) + " " + e.version + " for " + name + kb);
+        row.appendChild(dl);
         var sha = el("span", "SHA-256 ", "meta sha");
         sha.appendChild(el("code", x.sha256));
         row.appendChild(sha);

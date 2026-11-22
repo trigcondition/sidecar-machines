@@ -36,6 +36,15 @@
     check(document.querySelectorAll("#list > li .build a").length === 3, "board filter keeps all links of those cards");
     setBoard("");
     check(document.querySelectorAll("#list > li").length === 3, "board filter cleared");
+    function setQ(v) { var s = document.getElementById("q"); s.value = v; s.dispatchEvent(new Event("input")); }
+    setQ("sinq");
+    var hits = document.querySelectorAll("#list > li");
+    check(hits.length === 1 && hits[0].querySelectorAll(".build a").length === 2,
+          "a search that matches only the Pi 4 build still shows both download links");
+    check(/^Download Sine 1\.0\.0 for Pi 4/.test(hits[0].querySelector(".build a").getAttribute("aria-label") || ""),
+          "download links name the machine for screen readers");
+    setQ("");
+    check(document.querySelectorAll("#list > li").length === 3, "search cleared");
     lis = document.querySelectorAll("#list > li");
     var withPv = Array.prototype.filter.call(lis, function (l) { return l.querySelector(".toggle"); });
     check(withPv.length === 1, "only the card with previews has a toggle");
