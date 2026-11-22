@@ -67,10 +67,15 @@ def build_site(tmp):
               previews=[{"name": n[:-4], "file": "machines/test.sine/1.0.0/preview/" + n, "bytes": 400 * 417}
                         for n in ("01 Kick.mp3", "Pad #2 (long).mp3")]
               + [{"name": "dot", "file": "machines/./x.mp3", "bytes": 1}])   # refused by the player: not counted
-    e2 = dict(base, id="test.plain", name="Plain", file="machines/test.plain/1.0.0/x.rmp")
+    e1b = dict(e1, board="pi4", file="machines/test.sine/1.0.0/x4.rmp", sha256="4" * 64, size=2048)
+    e1["sha256"] = "5" * 64
+    e2 = dict(base, id="test.plain", name="Plain", file="machines/test.plain/1.0.0/x.rmp",
+              description="<b>bold</b> & plain")
+    e3 = dict(base, id="test.only4", name="Only4", board="pi4", file="machines/test.only4/1.0.0/x.rmp")
     with open(os.path.join(tmp, "index.json"), "w") as f:
-        json.dump({"schema": 1, "entries": [e2, e1], "latest": {"test.sine": {"pi5": "1.0.0"},
-                                                               "test.plain": {"pi5": "1.0.0"}}}, f)
+        json.dump({"schema": 1, "entries": [e3, e2, e1b, e1],
+                   "latest": {"test.sine": {"pi4": "1.0.0", "pi5": "1.0.0"}, "test.plain": {"pi5": "1.0.0"},
+                              "test.only4": {"pi4": "1.0.0"}}}, f)
 
 
 class SiteTest(unittest.TestCase):
