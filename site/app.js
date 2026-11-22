@@ -157,42 +157,77 @@
     return wrap;
   }
 
+  // One card per id + version: the builds (one per board) of that version become download links.
+  function groupCards(list) {
+    var cards = [], byKey = {};
+    list.forEach(function (e) {
+      var key = JSON.stringify([e.id, e.version]);
+      if (!byKey[key]) {
+        byKey[key] = { first: e, builds: [] };
+        cards.push(byKey[key]);
+      }
+      byKey[key].builds.push(e);
+    });
+    return cards;
+  }
+
+  function firstWith(builds, key) {
+    for (var i = 0; i < builds.length; i++) if (builds[i][key]) return builds[i][key];
+    return undefined;
+  }
+
   function render() {
     stopPreview();
     var term = q.value.trim().toLowerCase();
     var b = board.value;
-    var shown = entries.filter(function (e) {
-      if (b && e.board !== b) return false;
-      if (!all.checked && latest[e.id] && latest[e.id][e.board] !== e.version) return false;
-      if (!term) return true;
+    var current = entries.filter(function (e) {
+      return all.checked || !latest[e.id] || latest[e.id][e.board] === e.version;
+    });
+    function hit(e) {
       return [e.id, e.name, e.short, e.author, e.description, e.licence].join(" ").toLowerCase().indexOf(term) >= 0;
+    }
+    // search after grouping: a card that matches keeps every board's download link
+    var shown = groupCards(current).filter(function (c) {
+      return (!term || c.builds.some(hit)) && (!b || c.builds.some(function (x) { return x.board === b; }));
     });
     list.textContent = "";
-    shown.forEach(function (e, n) {
+    shown.forEach(function (c, n) {
+      var e = c.first;
       var li = el("li");
       var h = el("h2", e.name + " ");
       h.appendChild(el("span", e.version, "meta"));
       li.appendChild(h);
       var meta = el("p", "", "meta");
-      meta.appendChild(el("span", BOARD_NAMES[e.board] || e.board, "badge"));
       meta.appendChild(el("span", e.kind === "effect" ? "Effect" : "Machine", "badge"));
       meta.appendChild(el("span", e.licence, "badge"));
       meta.appendChild(el("span", "community, not tested by Sidecar", "badge"));
       meta.appendChild(document.createTextNode(" " + e.id + " by " + e.author));
       li.appendChild(meta);
       li.appendChild(el("p", e.description));
+      var builds = el("ul", "", "builds");
+      c.builds.forEach(function (x) {
+        var row = el("li", "", "build");
+        var name = BOARD_NAMES[x.board] || x.board;
+        var kb = Number.isFinite(x.size) && x.size > 0 ? " (" + Math.ceil(x.size / 1024) + " KB)" : "";
+        var dl = link(x.file, "Download for " + name + kb);
+        dl.setAttribute("aria-label", "Download " + (e.name || e.id) + " " + e.version + " for " + name + kb);
+        row.appendChild(dl);
+        var sha = el("span", "SHA-256 ", "meta sha");
+        sha.appendChild(el("code", x.sha256));
+        row.appendChild(sha);
+        builds.appendChild(row);
+      });
+      li.appendChild(builds);
       var act = el("p", "", "actions");
-      act.appendChild(link(e.file, "Download .rmp (" + Math.ceil(e.size / 1024) + " KB)"));
-      var src = safeUrl(e.source);
+      var srcUrl = firstWith(c.builds, "source");
+      var src = safeUrl(srcUrl);
       act.appendChild(src ? link(src, "Source") : el("span", "No source given", "meta"));
-      if (safeUrl(e.demo)) act.appendChild(link(e.demo, "Demo audio"));
+      var demo = safeUrl(firstWith(c.builds, "demo"));
+      if (demo) act.appendChild(link(demo, "Demo audio"));
       act.appendChild(link(e.readme, "Readme"));
       li.appendChild(act);
-      var pv = previewBlock(e, n);
+      var pv = previewBlock({ previews: firstWith(c.builds, "previews") }, n);
       if (pv) li.appendChild(pv);
-      var sha = el("p", "SHA-256 ", "meta");
-      sha.appendChild(el("code", e.sha256));
-      li.appendChild(sha);
       list.appendChild(li);
     });
     status.textContent = shown.length ? shown.length + " package(s)" : "Nothing matches.";

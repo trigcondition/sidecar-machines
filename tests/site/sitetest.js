@@ -17,9 +17,37 @@
   }
   wait(function () { return document.querySelector("#list li"); }, 5000).then(function () {
     var lis = document.querySelectorAll("#list > li");
-    check(lis.length === 2, "two entries listed");
+    check(lis.length === 3, "three cards listed (one per id and version, not per board)");
+    var sine = Array.prototype.filter.call(lis, function (l) { return l.querySelector("h2").textContent.indexOf("Sine") === 0; });
+    check(sine.length === 1, "Sine appears once");
+    var dl = sine[0].querySelectorAll(".build a");
+    check(dl.length === 2 && dl[0].textContent === "Download for Pi 4 (2 KB)" && dl[1].textContent === "Download for Pi 5 (1 KB)",
+          "Sine has a Pi 4 and a Pi 5 link: " + Array.prototype.map.call(dl, function (a) { return a.textContent; }));
+    var shas = Array.prototype.map.call(sine[0].querySelectorAll(".build code"), function (c) { return c.textContent; });
+    check(shas.join() === "4444444444444444444444444444444444444444444444444444444444444444,5555555555555555555555555555555555555555555555555555555555555555",
+          "each link keeps its own SHA-256");
+    var plain = Array.prototype.filter.call(lis, function (l) { return l.querySelector("h2").textContent.indexOf("Plain") === 0; })[0];
+    check(plain.querySelectorAll(".build a").length === 1 && plain.querySelector(".build a").textContent.indexOf("Pi 5") > 0, "one-board card has one link");
+    check(!plain.querySelector("b") && plain.textContent.indexOf("<b>bold</b>") >= 0, "index text is escaped");
+    check(sine[0].querySelectorAll(".toggle").length === 1, "one Previews list per card");
+    function setBoard(v) { var s = document.getElementById("board"); s.value = v; s.dispatchEvent(new Event("input")); }
+    setBoard("pi4");
+    check(document.querySelectorAll("#list > li").length === 2, "board filter Pi 4: cards with a Pi 4 build");
+    check(document.querySelectorAll("#list > li .build a").length === 3, "board filter keeps all links of those cards");
+    setBoard("");
+    check(document.querySelectorAll("#list > li").length === 3, "board filter cleared");
+    function setQ(v) { var s = document.getElementById("q"); s.value = v; s.dispatchEvent(new Event("input")); }
+    setQ("sinq");
+    var hits = document.querySelectorAll("#list > li");
+    check(hits.length === 1 && hits[0].querySelectorAll(".build a").length === 2,
+          "a search that matches only the Pi 4 build still shows both download links");
+    check(/^Download Sine 1\.0\.0 for Pi 4/.test(hits[0].querySelector(".build a").getAttribute("aria-label") || ""),
+          "download links name the machine for screen readers");
+    setQ("");
+    check(document.querySelectorAll("#list > li").length === 3, "search cleared");
+    lis = document.querySelectorAll("#list > li");
     var withPv = Array.prototype.filter.call(lis, function (l) { return l.querySelector(".toggle"); });
-    check(withPv.length === 1, "only the entry with previews has a toggle");
+    check(withPv.length === 1, "only the card with previews has a toggle");
     var li = withPv[0];
     var tog = li.querySelector(".toggle");
     var panel = document.getElementById(tog.getAttribute("aria-controls"));
